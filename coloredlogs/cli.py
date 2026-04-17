@@ -59,32 +59,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Command line interface for the ``coloredlogs`` program."""
-    actions = []
-    try:
-        # Parse the command line arguments.
-        options, arguments = getopt.getopt(sys.argv[1:], 'cdh', [
-            'convert', 'to-html', 'demo', 'help',
-        ])
-        # Map command line options to actions.
-        for option, value in options:
-            if option in ('-c', '--convert', '--to-html'):
-                actions.append(functools.partial(convert_command_output, *arguments))
-                arguments = []
-            elif option in ('-d', '--demo'):
-                actions.append(demonstrate_colored_logging)
-            elif option in ('-h', '--help'):
-                usage(__doc__)
-                return
-            else:
-                assert False, "Programming error: Unhandled option!"
-        if not actions:
-            usage(__doc__)
-            return
-    except Exception as e:
-        warning("Error: %s", e)
-        sys.exit(1)
-    for function in actions:
-        function()
+    pass
 
 
 def convert_command_output(*command):
@@ -95,12 +70,4 @@ def convert_command_output(*command):
     (emulating an interactive terminal), intercepts the output of the command
     and converts ANSI escape sequences in the output to HTML.
     """
-    captured_output = capture(command)
-    converted_output = convert(captured_output)
-    if connected_to_terminal():
-        fd, temporary_file = tempfile.mkstemp(suffix='.html')
-        with open(temporary_file, 'w') as handle:
-            handle.write(converted_output)
-        webbrowser.open(temporary_file)
-    elif captured_output and not captured_output.isspace():
-        output(converted_output)
+    pass

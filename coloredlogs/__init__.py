@@ -306,8 +306,7 @@ def auto_install():
 
     .. _path configuration file: https://docs.python.org/2/library/site.html#module-site
     """
-    if coerce_boolean(os.environ.get('COLOREDLOGS_AUTO_INSTALL', 'false')):
-        install()
+    pass
 
 
 def install(level=None, **kw):
@@ -719,17 +718,7 @@ def find_level_aliases():
     >>> find_level_aliases()
     {'WARN': 'WARNING', 'FATAL': 'CRITICAL'}
     """
-    mapping = collections.defaultdict(list)
-    for name, value in find_defined_levels().items():
-        mapping[value].append(name)
-    aliases = {}
-    for value, names in mapping.items():
-        if len(names) > 1:
-            names = sorted(names, key=lambda n: len(n))
-            canonical_name = names.pop()
-            for alias in names:
-                aliases[alias] = canonical_name
-    return aliases
+    pass
 
 
 def parse_encoded_styles(text, normalize_key=None):
@@ -970,15 +959,7 @@ class BasicFormatter(logging.Formatter):
         When `datefmt` contains the token ``%f`` it will be replaced by the
         value of ``%(msecs)03d`` (refer to issue `#45`_ for use cases).
         """
-        # The default value of the following argument is defined here so
-        # that Sphinx doesn't embed the default value in the generated
-        # documentation (because the result is awkward to read).
-        datefmt = datefmt or DEFAULT_DATE_FORMAT
-        # Replace %f with the value of %(msecs)03d.
-        if '%f' in datefmt:
-            datefmt = datefmt.replace('%f', '%03d' % record.msecs)
-        # Delegate the actual date/time formatting to the base formatter.
-        return logging.Formatter.formatTime(self, record, datefmt)
+        pass
 
 
 class ColoredFormatter(BasicFormatter):
@@ -1068,29 +1049,7 @@ class ColoredFormatter(BasicFormatter):
         are part of the same whitespace delimited token they'll be highlighted
         together in the style defined for the `name` field.
         """
-        result = []
-        parser = FormatStringParser(style=style)
-        for group in parser.get_grouped_pairs(fmt):
-            applicable_styles = [self.nn.get(self.field_styles, token.name) for token in group if token.name]
-            if sum(map(bool, applicable_styles)) == 1:
-                # If exactly one (1) field style is available for the group of
-                # tokens then all of the tokens will be styled the same way.
-                # This provides a limited form of backwards compatibility with
-                # the (intended) behavior of coloredlogs before the release of
-                # version 10.
-                result.append(ansi_wrap(
-                    ''.join(token.text for token in group),
-                    **next(s for s in applicable_styles if s)
-                ))
-            else:
-                for token in group:
-                    text = token.text
-                    if token.name:
-                        field_styles = self.nn.get(self.field_styles, token.name)
-                        if field_styles:
-                            text = ansi_wrap(text, **field_styles)
-                    result.append(text)
-        return ''.join(result)
+        pass
 
     def format(self, record):
         """
@@ -1106,38 +1065,7 @@ class ColoredFormatter(BasicFormatter):
         into the :func:`~logging.Formatter.format()` method of the base
         class.
         """
-        style = self.nn.get(self.level_styles, record.levelname)
-        # After the introduction of the `Empty' class it was reported in issue
-        # 33 that format() can be called when `Empty' has already been garbage
-        # collected. This explains the (otherwise rather out of place) `Empty
-        # is not None' check in the following `if' statement. The reasoning
-        # here is that it's much better to log a message without formatting
-        # then to raise an exception ;-).
-        #
-        # For more details refer to issue 33 on GitHub:
-        # https://github.com/xolox/python-coloredlogs/issues/33
-        if style and Empty is not None:
-            # Due to the way that Python's logging module is structured and
-            # documented the only (IMHO) clean way to customize its behavior is
-            # to change incoming LogRecord objects before they get to the base
-            # formatter. However we don't want to break other formatters and
-            # handlers, so we copy the log record.
-            #
-            # In the past this used copy.copy() but as reported in issue 29
-            # (which is reproducible) this can cause deadlocks. The following
-            # Python voodoo is intended to accomplish the same thing as
-            # copy.copy() without all of the generalization and overhead that
-            # we don't need for our -very limited- use case.
-            #
-            # For more details refer to issue 29 on GitHub:
-            # https://github.com/xolox/python-coloredlogs/issues/29
-            copy = Empty()
-            copy.__class__ = record.__class__
-            copy.__dict__.update(record.__dict__)
-            copy.msg = ansi_wrap(coerce_string(record.msg), **style)
-            record = copy
-        # Delegate the remaining formatting to the base formatter.
-        return logging.Formatter.format(self, record)
+        pass
 
 
 class Empty(object):
@@ -1202,10 +1130,7 @@ class HostNameFilter(logging.Filter):
 
     def filter(self, record):
         """Set each :class:`~logging.LogRecord`'s `hostname` field."""
-        # Modify the record.
-        record.hostname = self.hostname
-        # Don't filter the record.
-        return 1
+        pass
 
 
 class ProgramNameFilter(logging.Filter):
@@ -1256,10 +1181,7 @@ class ProgramNameFilter(logging.Filter):
 
     def filter(self, record):
         """Set each :class:`~logging.LogRecord`'s `programname` field."""
-        # Modify the record.
-        record.programname = self.programname
-        # Don't filter the record.
-        return 1
+        pass
 
 
 class UserNameFilter(logging.Filter):
@@ -1310,10 +1232,7 @@ class UserNameFilter(logging.Filter):
 
     def filter(self, record):
         """Set each :class:`~logging.LogRecord`'s `username` field."""
-        # Modify the record.
-        record.username = self.username
-        # Don't filter the record.
-        return 1
+        pass
 
 
 class StandardErrorHandler(logging.StreamHandler):
@@ -1336,7 +1255,7 @@ class StandardErrorHandler(logging.StreamHandler):
     @property
     def stream(self):
         """Get the value of :data:`sys.stderr` (a file-like object)."""
-        return sys.stderr
+        pass
 
 
 class FormatStringParser(object):
@@ -1392,32 +1311,7 @@ class FormatStringParser(object):
         :param format_string: The logging format string.
         :returns: A list of lists of :class:`FormatStringToken` objects.
         """
-        # Step 1: Split simple tokens (without a name) into
-        # their whitespace parts and non-whitespace parts.
-        separated = []
-        pattern = re.compile(r'(\s+)')
-        for token in self.get_pairs(format_string):
-            if token.name:
-                separated.append(token)
-            else:
-                separated.extend(
-                    FormatStringToken(name=None, text=text)
-                    for text in pattern.split(token.text) if text
-                )
-        # Step 2: Group tokens together based on whitespace.
-        current_group = []
-        grouped_pairs = []
-        for token in separated:
-            if token.text.isspace():
-                if current_group:
-                    grouped_pairs.append(current_group)
-                grouped_pairs.append([token])
-                current_group = []
-            else:
-                current_group.append(token)
-        if current_group:
-            grouped_pairs.append(current_group)
-        return grouped_pairs
+        pass
 
     def get_pairs(self, format_string):
         """
@@ -1426,10 +1320,7 @@ class FormatStringParser(object):
         :param format_string: The logging format string.
         :returns: A generator of :class:`FormatStringToken` objects.
         """
-        for token in self.get_tokens(format_string):
-            match = self.name_pattern.search(token)
-            name = match.group(1) if match else None
-            yield FormatStringToken(name=name, text=token)
+        pass
 
     def get_pattern(self, field_name):
         """
@@ -1447,7 +1338,7 @@ class FormatStringParser(object):
         :param format_string: The logging format string.
         :returns: A list of strings with formatting directives separated from surrounding text.
         """
-        return [t for t in self.tokenize_pattern.split(format_string) if t]
+        pass
 
 
 class FormatStringToken(collections.namedtuple('FormatStringToken', 'text, name')):
@@ -1511,7 +1402,7 @@ class NameNormalizer(object):
         :param value: The dictionary to normalize.
         :returns: A dictionary with normalized keys.
         """
-        return {self.normalize_name(k): v for k, v in value.items()}
+        pass
 
     def get(self, normalized_dict, name):
         """

@@ -284,7 +284,7 @@ def encode_whitespace_cb(match):
     This function is used by func:`encode_whitespace()` as a callback for
     replacement using a regular expression pattern.
     """
-    return '&nbsp;' * len(match.group(0))
+    pass
 
 
 def html_encode(text):
@@ -400,4 +400,4 @@ class ColoredCronMailer(object):
         minutes :-p). By calling :func:`silence()` the output can be swallowed
         retroactively, avoiding useless emails from ``cron``.
         """
-        self.is_silent = True
+        pass
